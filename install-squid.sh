@@ -23,15 +23,15 @@ mv /etc/squid/squid.conf /etc/squid/squid.conf.bak
 # Download custom Squid config
 /usr/bin/wget -q --no-check-certificate -O /etc/squid/squid.conf https://raw.githubusercontent.com/serverok/squid-proxy-installer/master/conf/ubuntu-2204.conf
 
-# Modify Squid Config to use port 5515
-sed -i 's/http_port 3128/http_port 5515/' /etc/squid/squid.conf
+# Modify Squid Config to use port 8080
+sed -i 's/http_port 3128/http_port 8080/' /etc/squid/squid.conf
 
 # Set up authentication for user 'sunny' with password 'Puja1'
 echo "sunny:$(openssl passwd -crypt Puja1)" | tee -a /etc/squid/passwd > /dev/null
 
 # Allow Squid port in firewall
 if [ -f /sbin/iptables ]; then
-    /sbin/iptables -I INPUT -p tcp --dport 5515 -j ACCEPT
+    /sbin/iptables -I INPUT -p tcp --dport 8080 -j ACCEPT
     /sbin/iptables-save
 fi
 
@@ -44,7 +44,7 @@ NC='\033[0m'
 CYAN='\033[0;36m'
 
 echo -e "${NC}"
-echo -e "${GREEN}Squid Proxy Installed with Port 5515.${NC}"
+echo -e "${GREEN}Squid Proxy Installed with Port 8080.${NC}"
 echo -e "${CYAN}Username: sunny${NC}"
 echo -e "${CYAN}Password: Puja1${NC}"
 echo -e "${CYAN}To edit config, use: sudo nano /etc/squid/squid.conf${NC}"
