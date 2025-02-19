@@ -1,9 +1,7 @@
 #!/bin/bash
 
 ############################################################
-# Squid Proxy Installer (Customized)
-# Author: ServerOk (Modified)
-# Description: Installs Squid Proxy with custom settings
+# Squid Proxy Installer (Fixed Authentication)
 ############################################################
 
 if [ `whoami` != root ]; then
@@ -17,6 +15,7 @@ fi
 
 # Configure Squid
 touch /etc/squid/passwd
+chmod 640 /etc/squid/passwd
 mv /etc/squid/squid.conf /etc/squid/squid.conf.bak
 /usr/bin/touch /etc/squid/blacklist.acl
 
@@ -26,8 +25,17 @@ mv /etc/squid/squid.conf /etc/squid/squid.conf.bak
 # Modify Squid Config to use port 8080
 sed -i 's/http_port 3128/http_port 8080/' /etc/squid/squid.conf
 
-# Set up authentication for user 'sunny' with password 'Puja1'
-echo "sunny:$(openssl passwd -crypt Puja1)" | tee -a /etc/squid/passwd > /dev/null
+# Setup Authentication
+echo "auth_param basic program /usr/lib/squid/basic_ncsa_auth /etc/squid/passwd" >> /etc/squid/squid.conf
+echo "auth_param basic realm Proxy" >> /etc/squid/squid.conf
+echo "acl authenticated proxy_auth REQUIRED" >> /etc/squid/squid.conf
+echo "http_access allow authenticated" >> /etc/squid/squid.conf
+
+# Create user with hashed password
+htpasswd -b -c /etc/squid/passwd sunny Puja1
+
+# Set correct permissions
+chmod 640 /etc/squid/passwd
 
 # Allow Squid port in firewall
 if [ -f /sbin/iptables ]; then
